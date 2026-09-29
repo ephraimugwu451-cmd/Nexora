@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Create Account</title>
 
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2563eb;
+      margin-bottom: 10px;
+    }
+
+    p {
+      text-align: center;
+      color: #666;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-top: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #2563eb;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+
+    <h1>Nexora</h1>
+
+    <p>Create your account</p>
+
+    <input id="name" type="text" placeholder="Your name">
+
+    <input id="email" type="email" placeholder="Email address">
+
+    <input id="password" type="password" placeholder="Password">
+
+    <button onclick="signup()">Create Account</button>
+
+    <div id="message"></div>
+
+    <a href="index.html">← Back to Nexora</a>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const SUPABASE_URL = "https://iqfhtwsreozgyofwrccx.supabase.co";
+
+    const SUPABASE_KEY = "sb_publishable_ib1ScncaNrcaam0o4IKnHg_htI4G4Oc";
+
+    const supabaseClient =
+      supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function signup() {
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+
+      if (!name || !email || !password) {
+        message.innerHTML = "Please fill in all fields.";
+        return;
+      }
+
+      const { data, error } =
+        await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              name: name
+            }
+          }
+        });
+
+      if (error) {
+        message.innerHTML = error.message;
+      } else {
+        message.innerHTML =
+          "Account created! Check your email to confirm your account.";
+      }
+    }
+  </script>
+
+</body>
+</html>
