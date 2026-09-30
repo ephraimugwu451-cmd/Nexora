@@ -3,70 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexora - Create Account</title>
+  <title>Nexora - Sign Up</title>
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
     }
 
     body {
-      margin: 0;
-      background: #f5f7fb;
+      min-height: 100vh;
+      background: #f4f7fb;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      padding: 20px;
     }
 
-    .box {
+    .container {
       background: white;
-      width: 90%;
-      max-width: 400px;
-      padding: 30px;
+      width: 100%;
+      max-width: 420px;
+      padding: 35px 25px;
       border-radius: 15px;
       box-shadow: 0 5px 25px rgba(0,0,0,0.1);
     }
 
     h1 {
       text-align: center;
-      color: #2563eb;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      color: #111827;
     }
 
-    p {
+    .subtitle {
       text-align: center;
       color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
     }
 
     input {
       width: 100%;
       padding: 13px;
-      margin-top: 15px;
-      border: 1px solid #ddd;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 15px;
+      font-size: 16px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #2563eb;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 8px;
       background: #2563eb;
       color: white;
+      border: none;
+      border-radius: 8px;
       font-size: 16px;
       font-weight: bold;
+      cursor: pointer;
     }
 
-    #message {
-      margin-top: 15px;
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .message {
+      margin-top: 18px;
       text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
     }
 
-    a {
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .back {
       display: block;
       text-align: center;
       margin-top: 20px;
@@ -78,67 +109,121 @@
 
 <body>
 
-  <div class="box">
+  <div class="container">
 
-    <h1>Nexora</h1>
+    <h1>Join Nexora</h1>
 
-    <p>Create your account</p>
+    <p class="subtitle">
+      Create your account
+    </p>
 
-    <input id="name" type="text" placeholder="Your name">
+    <form id="signupForm">
 
-    <input id="email" type="email" placeholder="Email address">
+      <label for="name">Full Name</label>
+      <input
+        type="text"
+        id="name"
+        placeholder="Enter your full name"
+        required
+      >
 
-    <input id="password" type="password" placeholder="Password">
+      <label for="email">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
 
-    <button onclick="signup()">Create Account</button>
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="Create a password"
+        minlength="6"
+        required
+      >
 
-    <div id="message"></div>
+      <button type="submit">
+        Create Account
+      </button>
 
-    <a href="index.html">← Back to Nexora</a>
+    </form>
+
+    <div id="message" class="message"></div>
+
+    <a href="index.html" class="back">
+      ← Back to Nexora
+    </a>
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    const SUPABASE_URL = "https://iqfhtwsreozgyofwrccx.supabase.co";
 
-    const SUPABASE_KEY = "sb_publishable_ib1ScncaNrcaam0o4IKnHg_htI4G4Oc";
+    const form = document.getElementById("signupForm");
+    const message = document.getElementById("message");
 
-    const supabaseClient =
-      supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    form.addEventListener("submit", function(event) {
 
-    async function signup() {
+      event.preventDefault();
 
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
-      const message = document.getElementById("message");
 
       if (!name || !email || !password) {
-        message.innerHTML = "Please fill in all fields.";
+        showMessage("Please complete all fields.", "error");
         return;
       }
 
-      const { data, error } =
-        await supabaseClient.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: {
-              name: name
-            }
-          }
-        });
-
-      if (error) {
-        message.innerHTML = error.message;
-      } else {
-        message.innerHTML =
-          "Account created! Check your email to confirm your account.";
+      if (password.length < 6) {
+        showMessage("Password must be at least 6 characters.", "error");
+        return;
       }
+
+      const existingUser = localStorage.getItem("nexoraUser");
+
+      if (existingUser) {
+        const user = JSON.parse(existingUser);
+
+        if (user.email === email) {
+          showMessage("An account with this email already exists.", "error");
+          return;
+        }
+      }
+
+      const userData = {
+        name: name,
+        email: email,
+        password: password,
+        createdAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(
+        "nexoraUser",
+        JSON.stringify(userData)
+      );
+
+      showMessage(
+        "Account created successfully! You can now use Nexora.",
+        "success"
+      );
+
+      form.reset();
+
+    });
+
+    function showMessage(text, type) {
+
+      message.textContent = text;
+
+      message.className = "message " + type;
+
+      message.style.display = "block";
+
     }
+
   </script>
 
 </body>
-</html>
+</html>    
